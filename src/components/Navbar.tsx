@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X, Sparkles, LogOut, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { label: "Services", href: "/services" },
@@ -15,6 +16,7 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const isHome = location.pathname === "/";
+  const { user, signOut } = useAuth();
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isHome ? "bg-transparent" : "bg-background/80 backdrop-blur-lg border-b border-border"}`}>
@@ -41,9 +43,32 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Button variant={isHome ? "hero" : "default"} size="sm" asChild>
-            <Link to="/book">Book Appointment</Link>
-          </Button>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <Button variant={isHome ? "heroOutline" : "outline"} size="sm" asChild>
+                <Link to="/profile" className="gap-2">
+                  <User className="w-4 h-4" /> Profile
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={signOut}
+                className={isHome ? "text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10" : ""}
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button variant={isHome ? "heroOutline" : "outline"} size="sm" asChild>
+                <Link to="/login">Sign In</Link>
+              </Button>
+              <Button variant={isHome ? "hero" : "default"} size="sm" asChild>
+                <Link to="/signup">Sign Up</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -75,9 +100,21 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Button variant="default" size="sm" asChild>
-                <Link to="/book" onClick={() => setMobileOpen(false)}>Book Appointment</Link>
-              </Button>
+              {user ? (
+                <>
+                  <Link to="/profile" onClick={() => setMobileOpen(false)} className="text-sm font-medium text-foreground py-2">Profile</Link>
+                  <Button variant="outline" size="sm" onClick={() => { signOut(); setMobileOpen(false); }}>Sign Out</Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/login" onClick={() => setMobileOpen(false)}>Sign In</Link>
+                  </Button>
+                  <Button variant="default" size="sm" asChild>
+                    <Link to="/signup" onClick={() => setMobileOpen(false)}>Sign Up</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         )}
